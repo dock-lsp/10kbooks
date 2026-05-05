@@ -55,47 +55,13 @@ android {
 
     buildTypes {
         release {
-            signingConfigs {
-                debug {
-                    storeFile file("debug.keystore")
-                    storePassword "android"
-                    keyAlias "androiddebugkey"
-                    keyPassword "android"
-                }
-                release {
-                    storeFile file("release.keystore")
-                    storePassword System.getenv("KEYSTORE_PASSWORD") ?: "your-keystore-password"
-                    keyAlias System.getenv("KEY_ALIAS") ?: "your-key-alias"
-                    keyPassword System.getenv("KEY_PASSWORD") ?: "your-key-password"
-                }
-            }
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            minifyEnabled false
+            shrinkResources false
             signingConfig signingConfigs.debug
         }
         debug {
             applicationIdSuffix ".debug"
             debuggable true
-        }
-    }
-
-    flavorDimensions "environment"
-    productFlavors {
-        production {
-            dimension "environment"
-            applicationIdSuffix ""
-            buildConfigField "String", "BASE_URL", '"https://api.10kbooks.com"'
-        }
-        staging {
-            dimension "environment"
-            applicationIdSuffix ".staging"
-            buildConfigField "String", "BASE_URL", '"https://staging-api.10kbooks.com"'
-        }
-        development {
-            dimension "environment"
-            applicationIdSuffix ".dev"
-            buildConfigField "String", "BASE_URL", '"http://10.0.2.2:3001/api"'
         }
     }
 
@@ -111,19 +77,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.multidex:multidex:2.0.1"
-
-    // Firebase
-    implementation platform("com.google.firebase:firebase-bom:32.7.0")
-    implementation "com.google.firebase:firebase-analytics"
-    implementation "com.google.firebase:firebase-messaging"
-
-    // Google Play Services
-    implementation "com.google.android.gms:play-services-auth:20.7.0"
-
-    // In-app payments
-    implementation "com.android.billingclient:billing:6.1.0"
 }
-
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
