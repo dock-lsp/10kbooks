@@ -91,9 +91,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
         if (chapterResult.success) {
           _chapter = chapterResult.data;
         }
-        if (progressResult.success) {
-          _readPosition = progressResult.data.position;
-          _readProgress = progressResult.data.percentage;
+        if (progressResult.success && progressResult.data != null) {
+          _readPosition = progressResult.data!.position;
+          _readProgress = progressResult.data!.percentage;
         }
       });
     }

@@ -134,13 +134,13 @@ class ApiClient {
     );
   }
 
-  Future<Response<T>> downloadFile<T>(
+  Future<Response> downloadFile(
     String path, {
     required String savePath,
     void Function(int, int)? onReceiveProgress,
     CancelToken? cancelToken,
   }) {
-    return _dio.download<T>(
+    return _dio.download(
       path,
       savePath,
       onReceiveProgress: onReceiveProgress,
@@ -305,5 +305,13 @@ class ApiResult<T> {
       code: code ?? 500,
       success: false,
     );
+  }
+
+  /// Support bracket access for Map-like data
+  dynamic operator [](String key) {
+    if (data is Map<String, dynamic>) {
+      return (data as Map<String, dynamic>)[key];
+    }
+    return null;
   }
 }

@@ -11,6 +11,7 @@ class BookService {
 
   // Get book list
   Future<ApiResult<PaginatedData<Book>>> getBooks({
+    String? categoryId,
     String? category,
     String? tag,
     String? keyword,
@@ -20,6 +21,7 @@ class BookService {
   }) async {
     try {
       final response = await _api.get('/books', queryParameters: {
+        if (categoryId != null) 'categoryId': categoryId,
         if (category != null) 'category': category,
         if (tag != null) 'tag': tag,
         if (keyword != null) 'keyword': keyword,
@@ -181,6 +183,60 @@ class BookService {
           .map((e) => Category.fromJson(e as Map<String, dynamic>))
           .toList();
       return ApiResult.success(categories);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Get book detail with chapters, comments, and recommendations
+  Future<ApiResult<Map<String, dynamic>>> getBookDetail(String bookId) async {
+    try {
+      final response = await _api.get('/books/$bookId/detail');
+      final data = response.data['data'] as Map<String, dynamic>;
+      return ApiResult.success(data);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Create a new book
+  Future<ApiResult<Book>> createBook(Map<String, dynamic> data) async {
+    try {
+      final response = await _api.post('/books', data: data);
+      final book = Book.fromJson(response.data['data'] as Map<String, dynamic>);
+      return ApiResult.success(book);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Update a book
+  Future<ApiResult<Book>> updateBook(String bookId, Map<String, dynamic> data) async {
+    try {
+      final response = await _api.patch('/books/$bookId', data: data);
+      final book = Book.fromJson(response.data['data'] as Map<String, dynamic>);
+      return ApiResult.success(book);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Delete a book
+  Future<ApiResult<bool>> deleteBook(String bookId) async {
+    try {
+      await _api.delete('/books/$bookId');
+      return ApiResult.success(true);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Publish a book
+  Future<ApiResult<Book>> publishBook(String bookId) async {
+    try {
+      final response = await _api.post('/books/$bookId/publish');
+      final book = Book.fromJson(response.data['data'] as Map<String, dynamic>);
+      return ApiResult.success(book);
     } catch (e) {
       return ApiResult.failure(e.toString());
     }

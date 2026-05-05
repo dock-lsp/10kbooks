@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../shared/services/user_service.dart';
 import '../../../shared/models/user_model.dart';
+import '../../../shared/models/book_model.dart';
 import '../../di/service_locator.dart';
 
 // Events
@@ -295,15 +296,26 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       final result = await _userService.getUserBooks(
         userId: event.userId,
         page: event.page,
-        size: event.size,
+        pageSize: event.size,
       );
 
-      final users = (result['items'] as List)
-          .map((json) => User.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final data = result.data;
+      final books = (data?['items'] as List?)
+              ?.map((json) => Book.fromJson(json as Map<String, dynamic>))
+              .toList() ??
+          [];
 
-      final total = result['total'] as int;
+      final total = data?['total'] as int? ?? 0;
       final hasMore = event.page * event.size < total;
+
+      // Convert books to users for UserListLoaded (this is a workaround)
+      final users = books
+          .map((book) => User(
+                id: book.authorId,
+                nickname: book.title,
+                avatar: book.coverUrl,
+              ))
+          .toList();
 
       emit(UserListLoaded(
         users: users,

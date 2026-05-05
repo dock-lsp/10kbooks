@@ -51,7 +51,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
         if (results[0].success) {
           _book = results[0].data;
         }
-        if (results[1].success) {
+        if (results[1].success && results[1].data != null) {
           _chapters = (results[1].data as PaginatedData<Chapter>).items;
         }
       });

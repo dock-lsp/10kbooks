@@ -51,6 +51,17 @@ class StorageService {
     ]);
   }
 
+  // Save token (convenience method for auth bloc)
+  Future<void> saveToken({
+    required String accessToken,
+    String? refreshToken,
+  }) async {
+    await saveAccessToken(accessToken);
+    if (refreshToken != null) {
+      await saveRefreshToken(refreshToken);
+    }
+  }
+
   // User Data
   Future<void> saveUser(Map<String, dynamic> user) async {
     await _prefs.setString(AppConfig.userKey, jsonEncode(user));

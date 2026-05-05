@@ -264,17 +264,18 @@ class BookBloc extends Bloc<BookEvent, BookState> {
   ) async {
     emit(BookLoading());
     try {
-      final result = await _bookService.createBook(
-        title: event.title,
-        subtitle: event.subtitle,
-        description: event.description,
-        categoryId: event.categoryId,
-        tags: event.tags,
-        cover: event.cover,
-        language: event.language,
-      );
+      final data = {
+        'title': event.title,
+        if (event.subtitle != null) 'subtitle': event.subtitle,
+        if (event.description != null) 'description': event.description,
+        if (event.categoryId != null) 'categoryId': event.categoryId,
+        if (event.tags != null) 'tags': event.tags,
+        if (event.cover != null) 'cover': event.cover,
+        if (event.language != null) 'language': event.language,
+      };
+      final result = await _bookService.createBook(data);
 
-      final book = Book.fromJson(result as Map<String, dynamic>);
+      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book created successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -287,18 +288,18 @@ class BookBloc extends Bloc<BookEvent, BookState> {
   ) async {
     emit(BookLoading());
     try {
-      final result = await _bookService.updateBook(
-        bookId: event.bookId,
-        title: event.title,
-        subtitle: event.subtitle,
-        description: event.description,
-        categoryId: event.categoryId,
-        tags: event.tags,
-        cover: event.cover,
-        language: event.language,
-      );
+      final data = {
+        if (event.title != null) 'title': event.title,
+        if (event.subtitle != null) 'subtitle': event.subtitle,
+        if (event.description != null) 'description': event.description,
+        if (event.categoryId != null) 'categoryId': event.categoryId,
+        if (event.tags != null) 'tags': event.tags,
+        if (event.cover != null) 'cover': event.cover,
+        if (event.language != null) 'language': event.language,
+      };
+      final result = await _bookService.updateBook(event.bookId, data);
 
-      final book = Book.fromJson(result as Map<String, dynamic>);
+      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book updated successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -325,7 +326,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     emit(BookLoading());
     try {
       final result = await _bookService.publishBook(event.bookId);
-      final book = Book.fromJson(result as Map<String, dynamic>);
+      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book published successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));

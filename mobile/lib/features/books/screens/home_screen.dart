@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: _categories.length > 8 ? 8 : _categories.length,
             itemBuilder: (context, index) {
               final category = _categories[index];
-              return _buildCategoryItem(category);
+              return _buildCategoryItem(category, index);
             },
           ),
         ),
@@ -226,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryItem(Category category) {
+  Widget _buildCategoryItem(Category category, int index) {
     final icons = [
       Icons.menu_book,
       Icons.auto_stories,

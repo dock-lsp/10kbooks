@@ -14,6 +14,7 @@ class AuthService {
     String? phone,
     String? email,
     required String password,
+    String? captcha,
   }) async {
     try {
       final response = await _api.post('/auth/login', data: {
@@ -21,6 +22,7 @@ class AuthService {
         if (email != null) 'email': email,
         'password': password,
         'loginType': 'password',
+        if (captcha != null) 'captcha': captcha,
       });
 
       final data = response.data['data'] as Map<String, dynamic>;
@@ -117,5 +119,63 @@ class AuthService {
     final userData = _storage.getUser();
     if (userData != null) return User.fromJson(userData);
     return null;
+  }
+
+  // Refresh token
+  Future<ApiResult<Map<String, dynamic>>> refreshToken(String refreshTokenStr) async {
+    try {
+      final response = await _api.post('/auth/refresh', data: {
+        'refreshToken': refreshTokenStr,
+      });
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      await _storage.saveTokens(data['token'] as String, data['refreshToken'] as String);
+
+      return ApiResult.success(data);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Update user profile
+  Future<ApiResult<User>> updateProfile({
+    String? nickname,
+    String? avatar,
+    String? bio,
+    String? language,
+  }) async {
+    try {
+      final response = await _api.patch('/users/me', data: {
+        if (nickname != null) 'nickname': nickname,
+        if (avatar != null) 'avatar': avatar,
+        if (bio != null) 'bio': bio,
+        if (language != null) 'language': language,
+      });
+      final user = User.fromJson(response.data['data'] as Map<String, dynamic>);
+      await _storage.saveUser(response.data['data'] as Map<String, dynamic>);
+      return ApiResult.success(user);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Submit real name authentication
+  Future<ApiResult<bool>> submitRealAuth({
+    required String idCardType,
+    required String idCardFront,
+    required String idCardBack,
+    String? handheldPhoto,
+  }) async {
+    try {
+      final response = await _api.post('/users/real-auth', data: {
+        'idCardType': idCardType,
+        'idCardFront': idCardFront,
+        'idCardBack': idCardBack,
+        if (handheldPhoto != null) 'handheldPhoto': handheldPhoto,
+      });
+      return ApiResult.success(true);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
   }
 }

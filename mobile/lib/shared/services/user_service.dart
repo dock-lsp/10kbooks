@@ -1,6 +1,7 @@
 import '../../core/network/api_client.dart';
 import '../../core/network/storage_service.dart';
 import '../models/user_model.dart';
+import '../models/book_model.dart';
 
 /// User Service
 class UserService {
@@ -107,7 +108,7 @@ class UserService {
   }
 
   // Get followers
-  Future<ApiResult<PaginatedData<User>>> getFollowers(
+  Future<ApiResult<Map<String, dynamic>>> getFollowers(
     String userId, {
     int page = 1,
     int size = 20,
@@ -117,23 +118,14 @@ class UserService {
         'page': page,
         'size': size,
       });
-      final data = response.data['data'] as Map<String, dynamic>;
-      final items = (data['items'] as List)
-          .map((e) => User.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return ApiResult.success(PaginatedData(
-        items: items,
-        total: data['total'] as int,
-        page: data['page'] as int,
-        size: data['size'] as int,
-      ));
+      return ApiResult.success(response.data['data'] as Map<String, dynamic>);
     } catch (e) {
       return ApiResult.failure(e.toString());
     }
   }
 
   // Get following
-  Future<ApiResult<PaginatedData<User>>> getFollowing(
+  Future<ApiResult<Map<String, dynamic>>> getFollowing(
     String userId, {
     int page = 1,
     int size = 20,
@@ -143,16 +135,7 @@ class UserService {
         'page': page,
         'size': size,
       });
-      final data = response.data['data'] as Map<String, dynamic>;
-      final items = (data['items'] as List)
-          .map((e) => User.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return ApiResult.success(PaginatedData(
-        items: items,
-        total: data['total'] as int,
-        page: data['page'] as int,
-        size: data['size'] as int,
-      ));
+      return ApiResult.success(response.data['data'] as Map<String, dynamic>);
     } catch (e) {
       return ApiResult.failure(e.toString());
     }
@@ -164,6 +147,55 @@ class UserService {
       final response = await _api.get('/authors/$authorId');
       final author = Author.fromJson(response.data['data'] as Map<String, dynamic>);
       return ApiResult.success(author);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Follow user
+  Future<void> followUser(String userId) async {
+    try {
+      await _api.post('/users/$userId/follow');
+    } catch (_) {}
+  }
+
+  // Unfollow user
+  Future<void> unfollowUser(String userId) async {
+    try {
+      await _api.delete('/users/$userId/follow');
+    } catch (_) {}
+  }
+
+  // Get user's books
+  Future<ApiResult<Map<String, dynamic>>> getUserBooks(
+    String userId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      final response = await _api.get('/users/$userId/books', queryParameters: {
+        'page': page,
+        'size': pageSize,
+      });
+      return ApiResult.success(response.data['data'] as Map<String, dynamic>);
+    } catch (e) {
+      return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Search users
+  Future<ApiResult<Map<String, dynamic>>> searchUsers(
+    String keyword, {
+    int page = 1,
+    int size = 20,
+  }) async {
+    try {
+      final response = await _api.get('/users/search', queryParameters: {
+        'keyword': keyword,
+        'page': page,
+        'size': size,
+      });
+      return ApiResult.success(response.data['data'] as Map<String, dynamic>);
     } catch (e) {
       return ApiResult.failure(e.toString());
     }
