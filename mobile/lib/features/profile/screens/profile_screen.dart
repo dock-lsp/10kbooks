@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/blocs/auth/auth_bloc.dart';
 import '../../../core/blocs/user/user_bloc.dart';
 import '../../../shared/models/user_model.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? userId;
@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBasicProfile(BuildContext context, UserModel user) {
+  Widget _buildBasicProfile(BuildContext context, User user) {
     return CustomScrollView(
       slivers: [
         SliverAppBar(

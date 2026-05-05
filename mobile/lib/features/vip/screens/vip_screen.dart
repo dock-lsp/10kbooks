@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../shared/services/payment_service.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class VipScreen extends StatefulWidget {
   const VipScreen({super.key});

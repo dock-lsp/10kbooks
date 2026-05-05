@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/blocs/book/book_bloc.dart';
 import '../../../shared/models/book_model.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class SearchScreen extends StatefulWidget {
-  final Function(BookModel book)? onBookTap;
+  final Function(Book book)? onBookTap;
 
   const SearchScreen({
     super.key,
@@ -19,7 +19,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
-  List<BookModel> _searchResults = [];
+  List<Book> _searchResults = [];
   List<String> _hotKeywords = ['玄幻', '都市', '科幻', '悬疑', '武侠'];
   List<String> _historyKeywords = [];
   bool _isSearching = false;
@@ -322,7 +322,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildBookItem(BookModel book) {
+  Widget _buildBookItem(Book book) {
     return InkWell(
       onTap: () => widget.onBookTap?.call(book),
       child: Padding(

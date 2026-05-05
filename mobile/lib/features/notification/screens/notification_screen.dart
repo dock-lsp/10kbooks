@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/blocs/auth/auth_bloc.dart';
 import '../../../core/blocs/book/book_bloc.dart';
 import '../../../shared/models/book_model.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});

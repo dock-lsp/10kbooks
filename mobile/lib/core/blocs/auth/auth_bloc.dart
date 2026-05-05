@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../shared/models/user_model.dart';
-import '../../shared/services/auth_service.dart';
-import '../../core/network/storage_service.dart';
-import '../../core/di/service_locator.dart';
+import '../../../shared/models/user_model.dart';
+import '../../../shared/services/auth_service.dart';
+import '../../network/storage_service.dart';
+import '../../di/service_locator.dart';
 
 // Events
 abstract class AuthEvent extends Equatable {
@@ -102,7 +102,7 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final UserModel user;
+  final User user;
   final String accessToken;
   final String? refreshToken;
 
@@ -196,7 +196,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticated(
-        user: UserModel.fromJson(result['user'] as Map<String, dynamic>),
+        user: User.fromJson(result['user'] as Map<String, dynamic>),
         accessToken: result['accessToken'] as String,
         refreshToken: result['refreshToken'] as String?,
       ));
@@ -226,7 +226,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticated(
-        user: UserModel.fromJson(result['user'] as Map<String, dynamic>),
+        user: User.fromJson(result['user'] as Map<String, dynamic>),
         accessToken: result['accessToken'] as String,
         refreshToken: result['refreshToken'] as String?,
       ));

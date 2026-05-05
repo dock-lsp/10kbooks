@@ -430,3 +430,60 @@ class ReadingProgress extends Equatable {
         lastReadAt,
       ];
 }
+
+
+/// Comment model
+class Comment extends Equatable {
+  final String id;
+  final String? parentId;
+  final String bookId;
+  final String? chapterId;
+  final User? user;
+  final String content;
+  final int likeCount;
+  final int replyCount;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const Comment({
+    required this.id,
+    this.parentId,
+    required this.bookId,
+    this.chapterId,
+    this.user,
+    required this.content,
+    this.likeCount = 0,
+    this.replyCount = 0,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      id: json['id'] as String,
+      parentId: json['parentId'] as String?,
+      bookId: json['bookId'] as String,
+      chapterId: json['chapterId'] as String?,
+      user: json['user'] != null ? User.fromJson(json['user'] as Map<String, dynamic>) : null,
+      content: json['content'] as String,
+      likeCount: json['likeCount'] as int? ?? 0,
+      replyCount: json['replyCount'] as int? ?? 0,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        parentId,
+        bookId,
+        chapterId,
+        user,
+        content,
+        likeCount,
+        replyCount,
+        createdAt,
+        updatedAt,
+      ];
+}

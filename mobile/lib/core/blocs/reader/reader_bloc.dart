@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../shared/models/book_model.dart';
-import '../../shared/services/book_service.dart';
-import '../../core/di/service_locator.dart';
+import '../../../shared/models/book_model.dart';
+import '../../../shared/services/book_service.dart';
+import '../../di/service_locator.dart';
 
 // Events
 abstract class ReaderEvent extends Equatable {
@@ -142,9 +142,9 @@ class ReaderInitial extends ReaderState {}
 class ReaderLoading extends ReaderState {}
 
 class ReaderLoaded extends ReaderState {
-  final BookModel book;
-  final ChapterModel chapter;
-  final List<ChapterModel> chapters;
+  final Book book;
+  final Chapter chapter;
+  final List<Chapter> chapters;
   final ReadingProgress? progress;
   final ReaderSettings settings;
   final bool showSettings;
@@ -159,9 +159,9 @@ class ReaderLoaded extends ReaderState {
   });
 
   ReaderLoaded copyWith({
-    BookModel? book,
-    ChapterModel? chapter,
-    List<ChapterModel>? chapters,
+    Book? book,
+    Chapter? chapter,
+    List<Chapter>? chapters,
     ReadingProgress? progress,
     ReaderSettings? settings,
     bool? showSettings,
@@ -248,12 +248,12 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
         chapterId: event.chapterId,
       );
 
-      final chapter = ChapterModel.fromJson(result['chapter'] as Map<String, dynamic>);
+      final chapter = Chapter.fromJson(result['chapter'] as Map<String, dynamic>);
       final book = result['book'] != null
-          ? BookModel.fromJson(result['book'] as Map<String, dynamic>)
+          ? Book.fromJson(result['book'] as Map<String, dynamic>)
           : null;
       final chapters = (result['chapters'] as List?)
-              ?.map((json) => ChapterModel.fromJson(json as Map<String, dynamic>))
+              ?.map((json) => Chapter.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
 
@@ -297,7 +297,7 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
         chapterId: event.chapterId,
       );
 
-      final chapter = ChapterModel.fromJson(result['chapter'] as Map<String, dynamic>);
+      final chapter = Chapter.fromJson(result['chapter'] as Map<String, dynamic>);
 
       emit(currentState.copyWith(
         chapter: chapter,

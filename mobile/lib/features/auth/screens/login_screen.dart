@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../core/blocs/auth/auth_bloc.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onRegisterTap;

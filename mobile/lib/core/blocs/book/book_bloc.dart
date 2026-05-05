@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../shared/models/book_model.dart';
-import '../../shared/services/book_service.dart';
-import '../../core/di/service_locator.dart';
+import '../../../shared/models/book_model.dart';
+import '../../../shared/services/book_service.dart';
+import '../../di/service_locator.dart';
 
 // Events
 abstract class BookEvent extends Equatable {
@@ -121,7 +121,7 @@ class BookInitial extends BookState {}
 class BookLoading extends BookState {}
 
 class BookListLoaded extends BookState {
-  final List<BookModel> books;
+  final List<Book> books;
   final int total;
   final int page;
   final int size;
@@ -140,10 +140,10 @@ class BookListLoaded extends BookState {
 }
 
 class BookDetailLoaded extends BookState {
-  final BookModel book;
-  final List<ChapterModel> chapters;
-  final List<CommentModel> comments;
-  final List<BookModel> recommendations;
+  final Book book;
+  final List<Chapter> chapters;
+  final List<Comment> comments;
+  final List<Book> recommendations;
 
   const BookDetailLoaded({
     required this.book,
@@ -158,7 +158,7 @@ class BookDetailLoaded extends BookState {
 
 class BookOperationSuccess extends BookState {
   final String message;
-  final BookModel? book;
+  final Book? book;
 
   const BookOperationSuccess({required this.message, this.book});
 
@@ -207,7 +207,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       );
 
       final books = (result['items'] as List)
-          .map((json) => BookModel.fromJson(json as Map<String, dynamic>))
+          .map((json) => Book.fromJson(json as Map<String, dynamic>))
           .toList();
 
       final total = result['total'] as int;
@@ -233,17 +233,17 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     try {
       final result = await _bookService.getBookDetail(event.bookId);
 
-      final book = BookModel.fromJson(result['book'] as Map<String, dynamic>);
+      final book = Book.fromJson(result['book'] as Map<String, dynamic>);
       final chapters = (result['chapters'] as List?)
-              ?.map((json) => ChapterModel.fromJson(json as Map<String, dynamic>))
+              ?.map((json) => Chapter.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
       final comments = (result['comments'] as List?)
-              ?.map((json) => CommentModel.fromJson(json as Map<String, dynamic>))
+              ?.map((json) => Comment.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
       final recommendations = (result['recommendations'] as List?)
-              ?.map((json) => BookModel.fromJson(json as Map<String, dynamic>))
+              ?.map((json) => Book.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
 
@@ -274,7 +274,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         language: event.language,
       );
 
-      final book = BookModel.fromJson(result as Map<String, dynamic>);
+      final book = Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book created successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -298,7 +298,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         language: event.language,
       );
 
-      final book = BookModel.fromJson(result as Map<String, dynamic>);
+      final book = Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book updated successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -325,7 +325,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     emit(BookLoading());
     try {
       final result = await _bookService.publishBook(event.bookId);
-      final book = BookModel.fromJson(result as Map<String, dynamic>);
+      final book = Book.fromJson(result as Map<String, dynamic>);
       emit(BookOperationSuccess(message: 'Book published successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));

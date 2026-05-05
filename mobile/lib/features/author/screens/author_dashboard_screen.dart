@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/blocs/book/book_bloc.dart';
 import '../../../shared/models/book_model.dart';
-import '../../../../core/config/theme_config.dart';
+import '../../../core/config/theme_config.dart';
 
 class AuthorDashboardScreen extends StatefulWidget {
   const AuthorDashboardScreen({super.key});
@@ -121,7 +121,7 @@ class _AuthorDashboardScreenState extends State<AuthorDashboardScreen>
     );
   }
 
-  Widget _buildWorksList(List<BookModel> books) {
+  Widget _buildWorksList(List<Book> books) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: books.isEmpty ? 3 : books.length,
@@ -298,7 +298,7 @@ class _AuthorDashboardScreenState extends State<AuthorDashboardScreen>
     );
   }
 
-  Widget _buildBookCard(BookModel book) {
+  Widget _buildBookCard(Book book) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../shared/models/book_model.dart';
-import '../../shared/services/book_service.dart';
-import '../../core/di/service_locator.dart';
-import '../../core/config/app_config.dart';
+import '../../../shared/models/book_model.dart';
+import '../../../shared/services/book_service.dart';
+import '../../../core/di/service_locator.dart';
+import '../../../core/config/app_config.dart';
 
 /// Home Screen - Main entry point of the app
 class HomeScreen extends StatefulWidget {

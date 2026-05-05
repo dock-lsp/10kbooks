@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../shared/services/user_service.dart';
-import '../../shared/models/user_model.dart';
-import '../../core/di/service_locator.dart';
+import '../../../shared/services/user_service.dart';
+import '../../../shared/models/user_model.dart';
+import '../../di/service_locator.dart';
 
 // Events
 abstract class UserEvent extends Equatable {
@@ -112,7 +112,7 @@ class UserInitial extends UserState {}
 class UserLoading extends UserState {}
 
 class UserProfileLoaded extends UserState {
-  final UserModel user;
+  final User user;
   final int followersCount;
   final int followingCount;
   final int booksCount;
@@ -131,7 +131,7 @@ class UserProfileLoaded extends UserState {
 }
 
 class UserListLoaded extends UserState {
-  final List<UserModel> users;
+  final List<User> users;
   final int total;
   final int page;
   final bool hasMore;
@@ -191,7 +191,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       final result = await _userService.getUserProfile(event.userId);
 
       emit(UserProfileLoaded(
-        user: UserModel.fromJson(result['user'] as Map<String, dynamic>),
+        user: User.fromJson(result['user'] as Map<String, dynamic>),
         followersCount: result['followersCount'] as int? ?? 0,
         followingCount: result['followingCount'] as int? ?? 0,
         booksCount: result['booksCount'] as int? ?? 0,
@@ -239,7 +239,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
 
       final users = (result['items'] as List)
-          .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
+          .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
       final total = result['total'] as int;
@@ -269,7 +269,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
 
       final users = (result['items'] as List)
-          .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
+          .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
       final total = result['total'] as int;
@@ -299,7 +299,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
 
       final users = (result['items'] as List)
-          .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
+          .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
       final total = result['total'] as int;
@@ -329,7 +329,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
 
       final users = (result['items'] as List)
-          .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
+          .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
       final total = result['total'] as int;
