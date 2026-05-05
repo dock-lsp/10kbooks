@@ -38,8 +38,8 @@ dependencies:
   lottie: ^3.0.0
 
   # Forms
-  flutter_form_builder: ^9.2.1
-  form_builder_validators: ^9.1.0
+  flutter_form_builder: ^9.5.0
+  form_builder_validators: ^11.0.0
 
   # Localization
   flutter_localizations:
@@ -54,7 +54,8 @@ dependencies:
   version: ^3.0.2
 
   # PDF Reader
-  flutter_pdfview: ^1.3.2
+  # flutter_pdfview: ^1.3.2  # removed, using syncfusion
+  syncfusion_flutter_pdfviewer: ^27.1.48
 
   # Notifications
   flutter_local_notifications: ^16.3.2
