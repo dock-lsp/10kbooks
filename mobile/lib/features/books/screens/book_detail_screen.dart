@@ -49,7 +49,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
       setState(() {
         _isLoading = false;
         if (results[0].success) {
-          _book = results[0].data;
+          _book = results[0].data as Book?;
         }
         if (results[1].success && results[1].data != null) {
           _chapters = (results[1].data as PaginatedData<Chapter>).items;
