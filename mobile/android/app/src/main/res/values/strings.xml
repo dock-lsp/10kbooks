@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">万卷书苑</string>
+    <string name="app_name_en">10kbooks</string>
+    <string name="description">数字阅读与创作平台</string>
+</resources>

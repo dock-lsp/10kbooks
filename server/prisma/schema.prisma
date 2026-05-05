@@ -1,0 +1,565 @@
+// Prisma schema for 10kbooks
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id              String    @id @default(uuid())
+  phone           String?   @unique
+  email           String?   @unique
+  passwordHash    String
+  nickname        String
+  avatar          String?
+  bio             String?
+  realName        String?
+  idCardType      String?   // id_card, passport
+  idCardNumber    String?
+  realAuthStatus  String    @default("none") // none, pending, approved, rejected
+  realAuthAt      DateTime?
+  vipStatus       String    @default("none") // none, monthly, yearly, permanent
+  vipExpireAt     DateTime?
+  language        String    @default("zh-CN")
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  lastLoginIp     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  // Relations
+  author          Author?
+  orders          Order[]           @relation("UserOrders")
+  orderGifts      Order[]           @relation("GiftReceiver")
+  comments        Comment[]
+  likes           Like[]
+  follows         Follow[]          @relation("Following")
+  followers       Follow[]          @relation("Follower")
+  notifications   Notification[]
+  readingProgress ReadingProgress[]
+  booklists       Booklist[]
+  dynamics        Dynamic[]
+  dynamicComments DynamicComment[]
+  aiUsage         AIUsage[]
+  reports         Report[]          @relation("Reporter")
+  reportedUsers   Report[]          @relation("ReportedUser")
+  sessions        Session[]
+  realAuth        RealAuth?
+
+  @@index([phone])
+  @@index([email])
+  @@index([vipStatus])
+  @@index([createdAt])
+}
+
+// Author Model
+model Author {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id])
+  penName             String    @unique
+  authorLevel         String    @default("normal") // normal, advanced, signed
+  totalBooks          Int       @default(0)
+  totalWords          Int       @default(0)
+  totalFans           Int       @default(0)
+  totalIncome         Decimal   @default(0) @db.Decimal(12, 2)
+  pendingIncome       Decimal   @default(0) @db.Decimal(12, 2)
+  withdrawableBalance Decimal   @default(0) @db.Decimal(12, 2)
+  bankAccount         String?
+  bankName            String?
+  paypalAccount       String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  books Book[]
+
+  @@index([userId])
+}
+
+// Book Model
+model Book {
+  id           String    @id @default(uuid())
+  authorId     String
+  author       Author    @relation(fields: [authorId], references: [id])
+  title        String
+  subtitle     String?
+  description  String?   @db.Text
+  coverUrl     String?
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  priceChapter Decimal   @default(0) @db.Decimal(8, 2)
+  priceBook    Decimal   @default(0) @db.Decimal(8, 2)
+  isVipOnly    Boolean   @default(false)
+  wordCount    Int       @default(0)
+  chapterCount Int       @default(0)
+  status       String    @default("draft") // draft, publishing, published, rejected, removed
+  auditStatus  String    @default("pending") // pending, approved, rejected
+  auditReason  String?
+  auditAt      DateTime?
+  auditorId    String?
+  ratingAvg    Decimal   @default(0) @db.Decimal(3, 2)
+  ratingCount  Int       @default(0)
+  viewCount    Int       @default(0)
+  subscriberCount Int   @default(0)
+  language     String    @default("zh-CN")
+  isSerial     Boolean   @default(true)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  // Relations
+  chapters     Chapter[]
+  bookTags     BookTag[]
+  comments     Comment[]
+  orders       Order[]
+  booklists    BooklistBook[]
+  readingProgress ReadingProgress[]
+  translations BookTranslation[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([auditStatus])
+  @@index([publishedAt])
+  @@index([ratingAvg])
+}
+
+// Category Model
+model Category {
+  id        String     @id @default(uuid())
+  name      String
+  nameEn    String
+  parentId  String?
+  parent    Category?  @relation("CategoryParent", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryParent")
+  level     Int        @default(1)
+  sort      Int        @default(0)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  books Book[]
+
+  @@index([parentId])
+  @@index([level])
+}
+
+// Tag Model
+model Tag {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  usageCount Int        @default(0)
+  createdAt  DateTime   @default(now())
+
+  bookTags BookTag[]
+
+  @@index([name])
+}
+
+// BookTag Model
+model BookTag {
+  id      String @id @default(uuid())
+  bookId  String
+  book    Book   @relation(fields: [bookId], references: [id])
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id])
+
+  @@unique([bookId, tagId])
+  @@index([bookId])
+  @@index([tagId])
+}
+
+// Chapter Model
+model Chapter {
+  id             String    @id @default(uuid())
+  bookId         String
+  book           Book      @relation(fields: [bookId], references: [id])
+  chapterNumber  Int
+  title          String
+  content        String?   @db.Text
+  summary        String?   @db.Text
+  wordCount      Int       @default(0)
+  priceType      String    @default("book") // free, vip, chapter, book
+  price          Decimal   @default(0) @db.Decimal(8, 2)
+  isVipOnly      Boolean   @default(false)
+  status         String    @default("draft") // draft, published
+  auditStatus    String    @default("pending")
+  publishedAt    DateTime?
+  scheduledAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  orders         Order[]
+  readingProgress ReadingProgress[]
+
+  @@unique([bookId, chapterNumber])
+  @@index([bookId])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+// Order Model
+model Order {
+  id              String    @id @default(uuid())
+  orderNo         String    @unique
+  userId          String
+  user            User      @relation("UserOrders", fields: [userId], references: [id])
+  bookId          String?
+  book            Book?     @relation(fields: [bookId], references: [id])
+  chapterId       String?
+  chapter         Chapter?  @relation(fields: [chapterId], references: [id])
+  orderType       String    // book, chapter, vip, gift
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("CNY") // CNY, USD
+  discountAmount  Decimal   @default(0) @db.Decimal(10, 2)
+  actualAmount    Decimal   @db.Decimal(10, 2)
+  paymentMethod   String?   // alipay, wechat, stripe, paypal
+  paymentStatus   String    @default("pending") // pending, paid, refunded, cancelled
+  paymentTime     DateTime?
+  paymentNo       String?   // Payment gateway transaction ID
+  platformFee     Decimal   @default(0) @db.Decimal(10, 2)
+  authorIncome    Decimal   @default(0) @db.Decimal(10, 2)
+  giftReceiverId  String?
+  giftReceiver    User?     @relation("GiftReceiver", fields: [giftReceiverId], references: [id])
+  giftMessage     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@index([bookId])
+  @@index([chapterId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// Payment Model
+model Payment {
+  id              String    @id @default(uuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id])
+  paymentMethod   String
+  paymentNo       String    @unique
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("CNY")
+  status          String    @default("pending") // pending, success, failed, refunded
+  callbackData    Json?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([orderId])
+  @@index([paymentNo])
+}
+
+// Comment Model
+model Comment {
+  id        String    @id @default(uuid())
+  bookId    String
+  book      Book      @relation(fields: [bookId], references: [id])
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  content   String    @db.Text
+  rating    Int?
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  likeCount Int       @default(0)
+  status    String    @default("approved") // pending, approved, hidden
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  likes     Like[]
+
+  @@index([bookId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+// Like Model
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+}
+
+// Follow Model
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// Notification Model
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // comment, like, follow, book_update, system, order
+  title     String
+  content   String
+  data      Json?
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// ReadingProgress Model
+model ReadingProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  bookId          String
+  book            Book     @relation(fields: [bookId], references: [id])
+  chapterId       String
+  chapter         Chapter  @relation(fields: [chapterId], references: [id])
+  position        Int      @default(0)
+  percentage      Decimal  @default(0) @db.Decimal(5, 2)
+  totalChapters   Int
+  currentChapter  Int
+  lastReadAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, bookId])
+  @@index([userId])
+  @@index([bookId])
+}
+
+// Booklist Model
+model Booklist {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  name            String
+  description     String?
+  coverUrl        String?
+  isPublic        Boolean  @default(true)
+  followerCount   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  books           BooklistBook[]
+
+  @@index([userId])
+}
+
+// BooklistBook Model
+model BooklistBook {
+  id         String   @id @default(uuid())
+  booklistId String
+  booklist   Booklist @relation(fields: [booklistId], references: [id])
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id])
+  note       String?
+  sort       Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@unique([booklistId, bookId])
+  @@index([booklistId])
+}
+
+// Dynamic Model
+model Dynamic {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  type         String   // text, image, book_recommend
+  content      String   @db.Text
+  images       Json?
+  bookId       String?
+  likeCount    Int      @default(0)
+  commentCount Int      @default(0)
+  shareCount   Int      @default(0)
+  status       String   @default("approved") // pending, approved, hidden
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  comments     DynamicComment[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// DynamicComment Model
+model DynamicComment {
+  id         String   @id @default(uuid())
+  dynamicId  String
+  dynamic    Dynamic  @relation(fields: [dynamicId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  content    String   @db.Text
+  parentId   String?
+  likeCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([dynamicId])
+  @@index([userId])
+}
+
+// AIUsage Model
+model AIUsage {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  type         String   // continue_write, polish, translate, summarize, qa
+  inputTokens  Int
+  outputTokens Int
+  totalTokens  Int
+  cost         Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// Withdrawal Model
+model Withdrawal {
+  id           String   @id @default(uuid())
+  authorId     String
+  amount       Decimal  @db.Decimal(10, 2)
+  method       String   // bank, paypal
+  bankAccount  String?
+  bankName     String?
+  paypalAccount String?
+  status       String   @default("pending") // pending, approved, rejected, processing, completed, failed
+  reason       String?
+  processedAt   DateTime?
+  completedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Report Model
+model Report {
+  id           String   @id @default(uuid())
+  reporterId   String
+  reporter     User     @relation("Reporter", fields: [reporterId], references: [id])
+  reportedUserId String?
+  reportedUser User?    @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  type         String   // user, book, comment, dynamic
+  targetId     String
+  reason       String
+  evidence     String?
+  status       String   @default("pending") // pending, processed, rejected
+  handlerId    String?
+  handlerNote  String?
+  processedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// RealAuth Model
+model RealAuth {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  idCardType   String
+  idCardFront  String
+  idCardBack   String
+  handheldPhoto String?
+  status       String   @default("pending") // pending, approved, rejected
+  rejectReason String?
+  reviewedAt   DateTime?
+  reviewedBy   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// Session Model
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  refreshToken String   @unique
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([refreshToken])
+}
+
+// BookTranslation Model
+model BookTranslation {
+  id         String   @id @default(uuid())
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id])
+  language   String
+  title      String
+  subtitle   String?
+  description String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([bookId, language])
+  @@index([bookId])
+}
+
+// VipPlan Model
+model VipPlan {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // monthly, yearly, permanent
+  priceCNY    Decimal  @db.Decimal(10, 2)
+  priceUSD    Decimal  @db.Decimal(10, 2)
+  discount    Int      @default(0) // percentage
+  features    Json
+  isActive    Boolean  @default(true)
+  sort        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Admin Model
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("admin") // admin, operator, finance
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
