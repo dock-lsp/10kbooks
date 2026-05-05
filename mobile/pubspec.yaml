@@ -58,7 +58,7 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^27.1.48
 
   # Notifications
-  flutter_local_notifications: ^16.3.2
+  flutter_local_notifications: ^18.0.1
 
   # Other
   json_annotation: ^4.8.1
