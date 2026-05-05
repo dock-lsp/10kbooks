@@ -2,6 +2,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/storage_service.dart';
 import '../models/user_model.dart';
 import '../models/book_model.dart';
+import 'book_service.dart';
 
 /// User Service
 class UserService {
@@ -200,21 +201,4 @@ class UserService {
       return ApiResult.failure(e.toString());
     }
   }
-}
-
-class PaginatedData<T> {
-  final List<T> items;
-  final int total;
-  final int page;
-  final int size;
-
-  PaginatedData({
-    required this.items,
-    required this.total,
-    required this.page,
-    required this.size,
-  });
-
-  int get totalPages => (total / size).ceil();
-  bool get hasMore => page < totalPages;
 }

@@ -46,7 +46,7 @@ class BookService {
     }
   }
 
-  // Get book detail
+  // Get book by ID
   Future<ApiResult<Book>> getBookById(String bookId) async {
     try {
       final response = await _api.get('/books/$bookId');
@@ -105,6 +105,32 @@ class BookService {
     }
   }
 
+  // Get chapter content (wrapper for reader bloc compatibility)
+  Future<Map<String, dynamic>> getChapterContent(
+    String bookId, {
+    String? chapterId,
+  }) async {
+    final targetChapterId = chapterId ?? '';
+    if (targetChapterId.isEmpty) {
+      // Get first chapter
+      final chaptersResult = await getChapters(bookId);
+      if (chaptersResult.success && chaptersResult.data != null && chaptersResult.data!.items.isNotEmpty) {
+        final firstChapter = chaptersResult.data!.items.first;
+        final chapterResult = await getChapter(bookId, firstChapter.id);
+        return {
+          'chapter': chapterResult.data!.toJson(),
+          'book': null,
+          'chapters': chaptersResult.data!.items.map((c) => c.toJson()).toList(),
+        };
+      }
+      throw Exception('No chapters found');
+    }
+    final chapterResult = await getChapter(bookId, targetChapterId);
+    return {
+      'chapter': chapterResult.data!.toJson(),
+    };
+  }
+
   // Search books
   Future<ApiResult<PaginatedData<Book>>> searchBooks({
     required String keyword,
@@ -153,6 +179,8 @@ class BookService {
     required String chapterId,
     required int position,
     required double percentage,
+    int currentChapter = 0,
+    int totalChapters = 0,
   }) async {
     try {
       final response = await _api.put('/reading/$bookId/progress', data: {
@@ -239,6 +267,47 @@ class BookService {
       return ApiResult.success(book);
     } catch (e) {
       return ApiResult.failure(e.toString());
+    }
+  }
+
+  // Translate content using AI
+  Future<String> translateContent(String content, {String targetLang = 'en'}) async {
+    try {
+      final response = await _api.post('/ai/translate', data: {
+        'content': content,
+        'targetLang': targetLang,
+      });
+      return response.data['data']['translated'] as String;
+    } catch (e) {
+      return 'Translation unavailable: $e';
+    }
+  }
+
+  // Summarize content using AI
+  Future<String> summarizeContent(String content) async {
+    try {
+      final response = await _api.post('/ai/summarize', data: {'content': content});
+      return response.data['data']['summary'] as String;
+    } catch (e) {
+      return 'Summary unavailable: $e';
+    }
+  }
+
+  // Answer question about book content using AI
+  Future<String> answerQuestion({
+    required String bookId,
+    required String question,
+    required String context,
+  }) async {
+    try {
+      final response = await _api.post('/ai/qa', data: {
+        'bookId': bookId,
+        'question': question,
+        'context': context,
+      });
+      return response.data['data']['answer'] as String;
+    } catch (e) {
+      return 'Answer unavailable: $e';
     }
   }
 }

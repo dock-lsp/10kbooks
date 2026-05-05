@@ -190,15 +190,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         captcha: event.captcha,
       );
 
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Login failed');
+      }
+
+      final data = result.data!;
       await _storageService.saveToken(
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       );
 
       emit(AuthAuthenticated(
-        user: User.fromJson(result['user'] as Map<String, dynamic>),
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        user: User.fromJson(data['user'] as Map<String, dynamic>),
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       ));
     } catch (e) {
       emit(AuthError(message: e.toString()));
@@ -220,15 +225,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         captcha: event.captcha,
       );
 
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Registration failed');
+      }
+
+      final data = result.data!;
       await _storageService.saveToken(
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       );
 
       emit(AuthAuthenticated(
-        user: User.fromJson(result['user'] as Map<String, dynamic>),
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        user: User.fromJson(data['user'] as Map<String, dynamic>),
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       ));
     } catch (e) {
       emit(AuthError(message: e.toString()));
@@ -266,15 +276,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final result = await _authService.refreshToken(refreshToken);
 
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Token refresh failed');
+      }
+
+      final data = result.data!;
       await _storageService.saveToken(
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       );
 
       emit(AuthAuthenticated(
         user: (state as AuthAuthenticated).user,
-        accessToken: result['accessToken'] as String,
-        refreshToken: result['refreshToken'] as String?,
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String?,
       ));
     } catch (e) {
       await _storageService.clearAll();
@@ -289,12 +304,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (state is! AuthAuthenticated) return;
 
     try {
-      final user = await _authService.updateProfile(
+      final result = await _authService.updateProfile(
         nickname: event.nickname,
         avatar: event.avatar,
         bio: event.bio,
         language: event.language,
       );
+
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Update failed');
+      }
+
+      final user = result.data!;
 
       emit(AuthAuthenticated(
         user: user,
@@ -315,12 +336,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     emit(AuthLoading());
     try {
-      await _authService.submitRealAuth(
+      final result = await _authService.submitRealAuth(
         idCardType: event.idCardType,
         idCardFront: event.idCardFront,
         idCardBack: event.idCardBack,
         handheldPhoto: event.handheldPhoto,
       );
+
+      if (!result.success) {
+        throw Exception(result.message ?? 'Real auth failed');
+      }
 
       // Refresh user data
       final user = await _authService.getCurrentUser();

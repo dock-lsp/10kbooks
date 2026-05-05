@@ -41,15 +41,15 @@ class AuthService {
     String? email,
     required String password,
     String? inviteCode,
-    required String captcha,
+    String? captcha,
   }) async {
     try {
       final response = await _api.post('/auth/register', data: {
         if (phone != null) 'phone': phone,
         if (email != null) 'email': email,
         'password': password,
-        'inviteCode': inviteCode,
-        'captcha': captcha,
+        if (inviteCode != null) 'inviteCode': inviteCode,
+        if (captcha != null) 'captcha': captcha,
       });
 
       final data = response.data['data'] as Map<String, dynamic>;

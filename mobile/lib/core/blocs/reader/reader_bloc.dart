@@ -301,7 +301,6 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
 
       emit(currentState.copyWith(
         chapter: chapter,
-        position: event.position,
       ));
     } catch (e) {
       emit(ReaderError(message: e.toString()));
@@ -314,7 +313,7 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
   ) async {
     try {
       await _bookService.updateReadingProgress(
-        bookId: event.bookId,
+        event.bookId,
         chapterId: event.chapterId,
         position: event.position,
         percentage: event.percentage,

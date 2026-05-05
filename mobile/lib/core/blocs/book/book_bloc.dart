@@ -206,11 +206,13 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         size: event.size,
       );
 
-      final books = (result['items'] as List)
-          .map((json) => Book.fromJson(json as Map<String, dynamic>))
-          .toList();
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load books');
+      }
 
-      final total = result['total'] as int;
+      final data = result.data!;
+      final books = data.items;
+      final total = data.total;
       final hasMore = event.page * event.size < total;
 
       emit(BookListLoaded(
@@ -233,16 +235,21 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     try {
       final result = await _bookService.getBookDetail(event.bookId);
 
-      final book = Book.fromJson(result['book'] as Map<String, dynamic>);
-      final chapters = (result['chapters'] as List?)
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load book detail');
+      }
+
+      final data = result.data!;
+      final book = Book.fromJson(data['book'] as Map<String, dynamic>);
+      final chapters = (data['chapters'] as List?)
               ?.map((json) => Chapter.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
-      final comments = (result['comments'] as List?)
+      final comments = (data['comments'] as List?)
               ?.map((json) => Comment.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
-      final recommendations = (result['recommendations'] as List?)
+      final recommendations = (data['recommendations'] as List?)
               ?.map((json) => Book.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
@@ -273,9 +280,14 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         if (event.cover != null) 'cover': event.cover,
         if (event.language != null) 'language': event.language,
       };
+
       final result = await _bookService.createBook(data);
 
-      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to create book');
+      }
+
+      final book = result.data!;
       emit(BookOperationSuccess(message: 'Book created successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -297,9 +309,14 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         if (event.cover != null) 'cover': event.cover,
         if (event.language != null) 'language': event.language,
       };
+
       final result = await _bookService.updateBook(event.bookId, data);
 
-      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to update book');
+      }
+
+      final book = result.data!;
       emit(BookOperationSuccess(message: 'Book updated successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -312,7 +329,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
   ) async {
     emit(BookLoading());
     try {
-      await _bookService.deleteBook(event.bookId);
+      final result = await _bookService.deleteBook(event.bookId);
+
+      if (!result.success) {
+        throw Exception(result.message ?? 'Failed to delete book');
+      }
+
       emit(const BookOperationSuccess(message: 'Book deleted successfully'));
     } catch (e) {
       emit(BookError(message: e.toString()));
@@ -326,7 +348,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     emit(BookLoading());
     try {
       final result = await _bookService.publishBook(event.bookId);
-      final book = result.data ?? Book.fromJson(result as Map<String, dynamic>);
+
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to publish book');
+      }
+
+      final book = result.data!;
       emit(BookOperationSuccess(message: 'Book published successfully', book: book));
     } catch (e) {
       emit(BookError(message: e.toString()));

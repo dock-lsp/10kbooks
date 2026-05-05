@@ -191,12 +191,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       final result = await _userService.getUserProfile(event.userId);
 
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load profile');
+      }
+
+      final user = result.data!;
       emit(UserProfileLoaded(
-        user: User.fromJson(result['user'] as Map<String, dynamic>),
-        followersCount: result['followersCount'] as int? ?? 0,
-        followingCount: result['followingCount'] as int? ?? 0,
-        booksCount: result['booksCount'] as int? ?? 0,
-        isFollowing: result['isFollowing'] as bool? ?? false,
+        user: user,
+        followersCount: 0,
+        followingCount: 0,
+        booksCount: 0,
+        isFollowing: false,
       ));
     } catch (e) {
       emit(UserError(message: e.toString()));
@@ -234,16 +239,21 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final result = await _userService.getFollowers(
-        userId: event.userId,
+        event.userId,
         page: event.page,
         size: event.size,
       );
 
-      final users = (result['items'] as List)
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load followers');
+      }
+
+      final data = result.data!;
+      final users = (data['items'] as List)
           .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      final total = result['total'] as int;
+      final total = data['total'] as int? ?? 0;
       final hasMore = event.page * event.size < total;
 
       emit(UserListLoaded(
@@ -264,16 +274,21 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final result = await _userService.getFollowing(
-        userId: event.userId,
+        event.userId,
         page: event.page,
         size: event.size,
       );
 
-      final users = (result['items'] as List)
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load following');
+      }
+
+      final data = result.data!;
+      final users = (data['items'] as List)
           .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      final total = result['total'] as int;
+      final total = data['total'] as int? ?? 0;
       final hasMore = event.page * event.size < total;
 
       emit(UserListLoaded(
@@ -294,31 +309,27 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final result = await _userService.getUserBooks(
-        userId: event.userId,
+        event.userId,
         page: event.page,
         pageSize: event.size,
       );
 
-      final data = result.data;
-      final books = (data?['items'] as List?)
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Failed to load books');
+      }
+
+      final data = result.data!;
+      final books = (data['items'] as List?)
               ?.map((json) => Book.fromJson(json as Map<String, dynamic>))
               .toList() ??
           [];
 
-      final total = data?['total'] as int? ?? 0;
+      final total = data['total'] as int? ?? 0;
       final hasMore = event.page * event.size < total;
 
-      // Convert books to users for UserListLoaded (this is a workaround)
-      final users = books
-          .map((book) => User(
-                id: book.authorId,
-                nickname: book.title,
-                avatar: book.coverUrl,
-              ))
-          .toList();
-
+      // Emit with empty users list since this is about books, not users
       emit(UserListLoaded(
-        users: users,
+        users: [],
         total: total,
         page: event.page,
         hasMore: hasMore,
@@ -335,16 +346,21 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final result = await _userService.searchUsers(
-        keyword: event.keyword,
+        event.keyword,
         page: event.page,
         size: event.size,
       );
 
-      final users = (result['items'] as List)
+      if (!result.success || result.data == null) {
+        throw Exception(result.message ?? 'Search failed');
+      }
+
+      final data = result.data!;
+      final users = (data['items'] as List)
           .map((json) => User.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      final total = result['total'] as int;
+      final total = data['total'] as int? ?? 0;
       final hasMore = event.page * event.size < total;
 
       emit(UserListLoaded(
