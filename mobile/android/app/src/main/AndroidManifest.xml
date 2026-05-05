@@ -73,14 +73,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Firebase Messaging Service -->
-        <service
-            android:name=".firebase.TenKBooksFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        <!-- Firebase Messaging Service removed (not configured) -->
 
         <!-- Notification Channel Provider -->
         <meta-data
@@ -108,10 +101,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- Google Play Install Referrer -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+        <!-- Google Play Services version removed (not configured) -->
     </application>
 
     <!-- Required for Chrome Custom Tabs -->
